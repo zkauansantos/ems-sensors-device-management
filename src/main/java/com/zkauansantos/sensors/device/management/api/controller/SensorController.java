@@ -1,5 +1,6 @@
 package com.zkauansantos.sensors.device.management.api.controller;
 
+import com.zkauansantos.sensors.device.management.api.client.SensorMonitoringClient;
 import com.zkauansantos.sensors.device.management.api.model.SensorInput;
 import com.zkauansantos.sensors.device.management.api.model.SensorOutput;
 import com.zkauansantos.sensors.device.management.common.IdGenerator;
@@ -19,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class SensorController {
     private final SensorRepository sensorRepository;
+    private final SensorMonitoringClient sensorMonitoringClient;
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
@@ -83,6 +85,7 @@ public class SensorController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         sensorRepository.delete(sensor);
+        sensorMonitoringClient.disableMonitoring(sensorId);
     }
 
     @PutMapping("{sensorId}/enable")
@@ -94,6 +97,8 @@ public class SensorController {
         sensor.setEnabled(true);
 
         sensorRepository.saveAndFlush(sensor);
+        sensorMonitoringClient.enableMonitoring(sensorId);
+
     }
 
     @DeleteMapping("{sensorId}/enable")
@@ -105,6 +110,7 @@ public class SensorController {
         sensor.setEnabled(false);
 
         sensorRepository.saveAndFlush(sensor);
+        sensorMonitoringClient.disableMonitoring(sensorId);
     }
 
     private SensorOutput convertToModel(Sensor sensor) {
