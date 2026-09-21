@@ -1,7 +1,9 @@
 package com.zkauansantos.sensors.device.management.api.controller;
 
 import com.zkauansantos.sensors.device.management.api.client.SensorMonitoringClient;
+import com.zkauansantos.sensors.device.management.api.model.SensorDetailOutput;
 import com.zkauansantos.sensors.device.management.api.model.SensorInput;
+import com.zkauansantos.sensors.device.management.api.model.SensorMonitoringOutput;
 import com.zkauansantos.sensors.device.management.api.model.SensorOutput;
 import com.zkauansantos.sensors.device.management.common.IdGenerator;
 import com.zkauansantos.sensors.device.management.domain.model.Sensor;
@@ -35,6 +37,21 @@ public class SensorController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         return convertToModel(sensor);
+    }
+
+    @GetMapping("/{sensorId}/detail")
+    @ResponseStatus(HttpStatus.OK)
+    public SensorDetailOutput getOneWithDetail(@PathVariable TSID sensorId) {
+        Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        SensorMonitoringOutput monitoring = sensorMonitoringClient.getDetail(sensorId);
+        SensorOutput sensorOutput =  convertToModel(sensor);
+
+        return SensorDetailOutput.builder()
+                .monitoring(monitoring)
+                .sensor(sensorOutput)
+                .build();
     }
 
     @PostMapping()
